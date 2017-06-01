@@ -9,6 +9,7 @@ import pandas as pd
 import pandas_datareader.data as web
 import pickle
 import requests
+from statistics import mean
 from sklearn import svm, cross_validation, neighbors
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
 
@@ -51,7 +52,7 @@ def extract_featuresets(ticker):
                                                df['{}_7d'.format(ticker)] ))
     vals = df['{}_target'.format(ticker)].values.tolist()
     str_vals = [str(i) for i in vals]
-    print('Data spread:',Counter(str_vals))
+    #print('Data spread:',Counter(str_vals))
     
     df.fillna(0, inplace=True)
     df = df.replace([np.inf, -np.inf], np.nan)
@@ -82,14 +83,30 @@ def do_ml(ticker):
 
     clf.fit(X_train, y_train)
     confidence = clf.score(X_test, y_test)
-    print('accuracy:',confidence)
+    #print('accuracy:',confidence)
     predictions = clf.predict(X_test)
-    print('predicted class counts:',Counter(predictions))
-    print()
-    print()
-    return confidence
+    #print('predicted class counts:',Counter(predictions))
 
+    cn = Counter(predictions).most_common(1)
+    return cn
+
+def all():
+    with open("ipctickers.pickle","rb") as f:
+        tickers = pickle.load(f)
+
+    accuracies = []
+    for count,ticker in enumerate(tickers):
+            
+        accuracy = do_ml(ticker)
+        #accuracies.append(accuracy)
+        #print("{} result: {}. Average accuracy:{}".format(ticker,accuracy,mean(accuracies)))
+        #print("{} result: {}".format(ticker,accuracy[0][0]))
+        print(accuracy[0][0])
+        #print()
+        #print()
+
+all()
 # examples of running:
-do_ml('MBV:ALFAA')
+#do_ml('BMV:ALFAA')
 
 
